@@ -1,0 +1,32 @@
+# 生成项目相关的信息
+project:
+  # 项目的路径
+  base: "./out/"
+  # 项目的go module信息
+  go_mod: "gormgen"
+
+
+# 数据库相关的信息
+database:
+  # 数据库连接，参考dsn: "用户名:密码@tcp(127.0.0.1:3306)/数据库名"
+  dsn: "root:root@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local"
+  # 所有要生成到Go结构体中的表
+  tables:
+    # name-表名（必填）
+    # goStruct-Go中结构体名（必填）
+    # createTime-创建时间的数据库字段，必须为时间格式
+    # updateTime-更新时间的数据库字段，必须为时间格式
+    # softDeleteKey-软删除的数据库字段，必须为整数型，不填则为硬删除
+    # softDeleteValue-表示为软删除的对应值
+    - name: "user"
+      goStruct: "user"
+      createTime: "create_time"
+      updateTime: "update_time"
+      softDeleteKey: "deleted"
+      softDeleteValue: 1
+    - name: "orders"
+      goStruct: "order"
+      createTime: "create_time"
+      updateTime: "update_time"
+      softDeleteKey: "deleted"
+      softDeleteValue: 1
