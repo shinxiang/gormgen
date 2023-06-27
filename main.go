@@ -54,14 +54,6 @@ func main() {
 		os.MkdirAll(path, os.ModePerm)
 	}
 
-	// Check go mod path
-	if strings.HasPrefix(projectPath, "./") {
-		p := strings.Trim(projectPath, "./")
-		if p != "" {
-			goMod += "/" + p
-		}
-	}
-
 	var (
 		tables   []string
 		tMatcher map[string]tpl.TableInfo

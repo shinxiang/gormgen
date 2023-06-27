@@ -16,6 +16,7 @@ const (
 	showCreateTableSQL = "SHOW CREATE TABLE %s"
 	primaryKeyMark     = "PRIMARY KEY"
 	commentMark        = "COMMENT"
+	unsignedKeyFlag    = "unsigned"
 )
 
 var tableToGoStruct = map[string]string{
@@ -118,6 +119,7 @@ func parseTable(s string) []FieldLevel {
 			p := strings.Split(line, " ")
 			name := strings.Trim(p[0], "`")
 			dataType := p[1]
+			isUnsigned := strings.Contains(line, unsignedKeyFlag)
 			comment := ""
 			if strings.ToUpper(p[len(p)-2]) == commentMark {
 				comment = strings.Trim(strings.Trim(p[len(p)-1], ","), "'")
@@ -129,7 +131,7 @@ func parseTable(s string) []FieldLevel {
 			}
 			columns = append(columns, FieldLevel{
 				FieldName:  camelCase(name),
-				FieldType:  fieldType(dataType),
+				FieldType:  fieldType(dataType, isUnsigned),
 				PrimaryKey: primaryKey,
 				GormName:   name,
 				JsonName:   jsonCamelCase(name),
@@ -163,9 +165,12 @@ func getPrimaryKey(lines []string) map[string]bool {
 	return priKey
 }
 
-func fieldType(dataType string) string {
+func fieldType(dataType string, isUnsigned bool) string {
 	for tableType, goType := range tableToGoStruct {
 		if strings.HasPrefix(dataType, tableType) {
+			if isUnsigned && strings.HasPrefix(goType, "int") {
+				return "u" + goType
+			}
 			return goType
 		}
 	}
