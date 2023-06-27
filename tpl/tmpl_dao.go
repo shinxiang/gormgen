@@ -1,7 +1,7 @@
 package tpl
 
 const (
-	DaoImplHeader = `package %s
+	DaoHeader = `package %s
 
 import (
 	"context"
@@ -10,11 +10,29 @@ import (
 	
 	"gorm.io/gorm"
 	"%s/%s"
+	"%s/%s"
 )
 `
 )
 
 var (
+	TmplIDao = `
+var _ I{{.StructName.UpperS}}Dao = (*{{.StructName.UpperS}}Dao)(nil)
+
+type I{{.StructName.UpperS}}Dao interface {
+	Insert(ctx context.Context, {{.StructName.LowerP}} ...*model.{{.StructName.UpperS}}) (err error)
+	Save(ctx context.Context, {{.StructName.LowerS}} *model.{{.StructName.UpperS}}) (err error)
+	FindOne(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) ({{.StructName.LowerS}} *model.{{.StructName.UpperS}}, err error)
+	FindList(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) ({{.StructName.LowerS}}s []model.{{.StructName.UpperS}}, total int64, err error)
+	Count(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) (count int64, err error)
+	Update(ctx context.Context, {{.StructName.LowerS}} *model.{{.StructName.UpperS}}, condition *opt.{{.StructName.UpperS}}Option) (err error)
+	Delete(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) (err error)
+
+	// write you method here
+}
+
+`
+
 	TmplDao = `
 type {{.StructName.UpperS}}Dao struct {
 	db *gorm.DB
@@ -90,7 +108,7 @@ func (m *{{.StructName.UpperS}}Dao) Save(ctx context.Context, {{.StructName.Lowe
 `
 
 	TmplFindOne = `
-func (m *{{.StructName.UpperS}}Dao) FindOne(ctx context.Context, condition *model.{{.StructName.UpperS}}Option) ({{.StructName.LowerS}} *model.{{.StructName.UpperS}}, err error) {
+func (m *{{.StructName.UpperS}}Dao) FindOne(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) ({{.StructName.LowerS}} *model.{{.StructName.UpperS}}, err error) {
 	db := m.db.WithContext(ctx)
 	if condition != nil {
 		db = condition.BuildQuery(db)
@@ -104,7 +122,7 @@ func (m *{{.StructName.UpperS}}Dao) FindOne(ctx context.Context, condition *mode
 `
 
 	TmplFindList = `
-func (m *{{.StructName.UpperS}}Dao) FindList(ctx context.Context, condition *model.{{.StructName.UpperS}}Option) ({{.StructName.LowerP}} []model.{{.StructName.UpperS}}, total int64, err error) {
+func (m *{{.StructName.UpperS}}Dao) FindList(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) ({{.StructName.LowerP}} []model.{{.StructName.UpperS}}, total int64, err error) {
 	db := m.db.WithContext(ctx)
 	if condition != nil {
 		db = condition.BuildQuery(db)
@@ -126,7 +144,7 @@ func (m *{{.StructName.UpperS}}Dao) FindList(ctx context.Context, condition *mod
 `
 
 	TmplCount = `
-func (m *{{.StructName.UpperS}}Dao) Count(ctx context.Context, condition *model.{{.StructName.UpperS}}Option) (count int64, err error) {
+func (m *{{.StructName.UpperS}}Dao) Count(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) (count int64, err error) {
 	db := m.db.WithContext(ctx)
 	if condition != nil {
 		db = condition.BuildQuery(db)
@@ -140,7 +158,7 @@ func (m *{{.StructName.UpperS}}Dao) Count(ctx context.Context, condition *model.
 `
 
 	TmplUpdate = `
-func (m *{{.StructName.UpperS}}Dao) Update(ctx context.Context, {{.StructName.LowerS}} *model.{{.StructName.UpperS}}, condition *model.{{.StructName.UpperS}}Option) (err error) {
+func (m *{{.StructName.UpperS}}Dao) Update(ctx context.Context, {{.StructName.LowerS}} *model.{{.StructName.UpperS}}, condition *opt.{{.StructName.UpperS}}Option) (err error) {
 	if {{.StructName.LowerS}} == nil {
 		return errors.New("update must include {{.StructName.LowerS}} model")
 	} else if condition == nil {
@@ -162,7 +180,7 @@ func (m *{{.StructName.UpperS}}Dao) Update(ctx context.Context, {{.StructName.Lo
 `
 
 	TmplDelete = `
-func (m *{{.StructName.UpperS}}Dao) Delete(ctx context.Context, condition *model.{{.StructName.UpperS}}Option) (err error) {
+func (m *{{.StructName.UpperS}}Dao) Delete(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) (err error) {
 	if condition == nil {
 		return errors.New("delete must include where condition")
 	}
@@ -190,5 +208,5 @@ func (m *{{.StructName.UpperS}}Dao) Delete(ctx context.Context, condition *model
 }
 `
 
-	DaoImplTemplate = TmplDao + TmplInsert + TmplSave + TmplFindOne + TmplFindList + TmplCount + TmplUpdate + TmplDelete
+	DaoImplTemplate = TmplIDao + TmplDao + TmplInsert + TmplSave + TmplFindOne + TmplFindList + TmplCount + TmplUpdate + TmplDelete
 )

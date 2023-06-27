@@ -13,7 +13,6 @@ import (
 var (
 	ModelOptTemplate = `
 const (
-{{.StructName.UpperS}}TableName = "{{.TableName}}"
 {{range $item := .Columns}}
     {{$.StructName.LowerS}}Field{{$item.FieldName}} = "{{$item.GormName}}" {{end}}
 )

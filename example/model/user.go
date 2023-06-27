@@ -5,9 +5,11 @@ import (
 	"time"
 )
 
+var UserTableName = "user"
+
 // User table model
 type User struct {
-	Id         int64     `gorm:"column:id;primary_key" json:"id"`      // 用户id
+	Id         uint64    `gorm:"column:id;primary_key" json:"id"`      // 用户id
 	Nickname   string    `gorm:"column:nickname" json:"nickname"`      // 昵称
 	Username   string    `gorm:"column:username" json:"username"`      // 用户名
 	Password   string    `gorm:"column:password" json:"password"`      // 登录密码

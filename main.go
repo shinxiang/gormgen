@@ -42,6 +42,7 @@ func main() {
 		projectPath = Viper.GetString("project.base")
 		modelPath   = "model/" // model实例
 		daoPath     = "dao/"   // dao接口层
+		optPath     = "opt/"   // opt封装层
 	)
 
 	if dsn == "" || goMod == "" || projectPath == "" {
@@ -50,8 +51,27 @@ func main() {
 	}
 
 	// 创建文件夹（如果已存在会报错，不影响）
-	for _, path := range []string{projectPath + daoPath, projectPath + modelPath, projectPath} {
+	for _, path := range []string{projectPath + daoPath, projectPath + modelPath, projectPath + optPath, projectPath} {
 		os.MkdirAll(path, os.ModePerm)
+	}
+
+	// Check go mod path
+	if strings.HasPrefix(projectPath, "./") {
+		p := strings.Trim(projectPath, "./")
+		if p != "" {
+			goMod += "/" + p
+		}
+	}
+
+	// 检查文件路径
+	if daoPath[len(daoPath)-1] == '/' {
+		daoPath = daoPath[:len(daoPath)-1]
+	}
+	if modelPath[len(modelPath)-1] == '/' {
+		modelPath = modelPath[:len(modelPath)-1]
+	}
+	if optPath[len(optPath)-1] == '/' {
+		optPath = optPath[:len(optPath)-1]
 	}
 
 	var (
@@ -99,15 +119,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		// 2.检查文件路径
-		if daoPath[len(daoPath)-1] == '/' {
-			daoPath = daoPath[:len(daoPath)-1]
-		}
-		if modelPath[len(modelPath)-1] == '/' {
-			modelPath = modelPath[:len(modelPath)-1]
-		}
-
-		// 3-1.生成model file
+		// 2.生成model file
 		dirs := strings.Split(modelPath, "/")
 		header := fmt.Sprintf(tpl.ModelHeader, dirs[len(dirs)-1])
 		err = parseToFile(projectPath+modelPath, tMatcher[table].GoStruct, header, structResult, parseToTmpl, tpl.ModelTemplate)
@@ -116,28 +128,19 @@ func main() {
 			os.Exit(1)
 		}
 
-		// 3-2.生成model opt file
-		dirs = strings.Split(modelPath, "/")
+		// 3.生成model opt file
+		dirs = strings.Split(optPath, "/")
 		header = fmt.Sprintf(tpl.ModelOptHeader, dirs[len(dirs)-1])
-		err = parseToFile(projectPath+modelPath, tMatcher[table].GoStruct+".opt", header, structResult, parseToTmpl, tpl.ModelOptTemplate)
+		err = parseToFile(projectPath+optPath, tMatcher[table].GoStruct+".opt", header, structResult, parseToTmpl, tpl.ModelOptTemplate)
 		if err != nil {
 			fmt.Printf("parseToFile error %+v\n", err)
 			os.Exit(1)
 		}
 
-		// 4-1.生成dao interface file
+		// 4.生成dao file
 		dirs = strings.Split(daoPath, "/")
-		header = fmt.Sprintf(tpl.DaoInterfaceHeader, dirs[len(dirs)-1], goMod, modelPath)
-		err = parseToFile(projectPath+daoPath, tMatcher[table].GoStruct, header, structResult, parseToTmpl, tpl.DaoInterfaceTemplate)
-		if err != nil {
-			fmt.Printf("parseToFile error %+v\n", err)
-			os.Exit(1)
-		}
-
-		// 4-2.生成 dao implement file
-		dirs = strings.Split(daoPath, "/")
-		header = fmt.Sprintf(tpl.DaoImplHeader, dirs[len(dirs)-1], goMod, modelPath)
-		err = parseToFile(projectPath+daoPath, tMatcher[table].GoStruct+".impl", header, structResult, parseToTmpl, tpl.DaoImplTemplate)
+		header = fmt.Sprintf(tpl.DaoHeader, dirs[len(dirs)-1], goMod, modelPath, goMod, optPath)
+		err = parseToFile(projectPath+daoPath, tMatcher[table].GoStruct, header, structResult, parseToTmpl, tpl.DaoImplTemplate)
 		if err != nil {
 			fmt.Printf("parseToFile error %+v\n", err)
 			os.Exit(1)

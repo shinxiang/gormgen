@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/shinxiang/gormgen/example/opt"
 	"log"
 	"os"
 	"time"
@@ -88,7 +89,7 @@ func TestSave(db *gorm.DB) {
 func TestFindOne(db *gorm.DB) {
 	var dao dao.IUserDao = dao.NewUserDao(db)
 
-	option := model.NewUserOption().
+	option := opt.NewUserOption().
 		Where("username = ?", "admin").
 		OrderBy("id desc")
 
@@ -103,7 +104,7 @@ func TestFindOne(db *gorm.DB) {
 func TestFindList(db *gorm.DB) {
 	var dao dao.IUserDao = dao.NewUserDao(db)
 
-	option := model.NewUserOption().
+	option := opt.NewUserOption().
 		SetPage(0, 2).
 		Where("id > ? and username like ?", 1, "%"+"admin"+"%")
 
@@ -129,7 +130,7 @@ func TestFindListAll(db *gorm.DB) {
 func TestCount(db *gorm.DB) {
 	var dao dao.IUserDao = dao.NewUserDao(db)
 
-	option := model.NewUserOption()
+	option := opt.NewUserOption()
 	option.Where("username = ?", "admin")
 
 	count, err := dao.Count(context.Background(), option)
@@ -153,7 +154,7 @@ func TestUpdate(db *gorm.DB) {
 
 	// GORM when updating with struct it will only update non-zero fields by default.
 	// Use option.SelectAll() can solve this problem.
-	option := model.NewUserOption().SelectAll()
+	option := opt.NewUserOption().SelectAll()
 
 	err := dao.Update(context.Background(), &user, option)
 	if err != nil {
@@ -165,7 +166,7 @@ func TestUpdate(db *gorm.DB) {
 func TestDelete(db *gorm.DB) {
 	var dao dao.IUserDao = dao.NewUserDao(db)
 
-	option := model.NewUserOption()
+	option := opt.NewUserOption()
 	option.Where("id = ?", 2)
 
 	err := dao.Delete(context.Background(), option)

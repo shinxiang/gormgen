@@ -12,6 +12,8 @@ import (
 
 var (
 	ModelTemplate = `
+var {{.StructName.UpperS}}TableName = "{{.TableName}}"
+
 // {{.StructName.UpperS}} table model
 type {{.StructName.UpperS}} struct { {{range $item := .Columns}}
 	{{$item.FieldName}}	{{$item.FieldType}}	` + "`" + `gorm:"column:{{$item.GormName}}{{$item.PrimaryKey}}" json:"{{$item.JsonName}}"` + "`" + ` // {{$item.Comment}} {{end}}

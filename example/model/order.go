@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+var OrderTableName = "orders"
+
 // Order table model
 type Order struct {
 	Id         int64     `gorm:"column:id;primary_key" json:"id"`      // 主键
