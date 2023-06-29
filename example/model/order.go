@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var OrderTableName = "orders"
+const OrderTableName = "orders"
 
 // Order table model
 type Order struct {

@@ -1,9 +1,9 @@
 # 生成项目相关的信息
 project:
   # 项目的路径
-  base: "./out/"
+  base: "./example/"
   # 项目的go module信息
-  go_mod: "gormgen"
+  go_mod: "github.com/shinxiang/gormgen"
 
 
 # 数据库相关的信息

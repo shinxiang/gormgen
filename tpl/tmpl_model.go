@@ -12,7 +12,7 @@ import (
 
 var (
 	ModelTemplate = `
-var {{.StructName.UpperS}}TableName = "{{.TableName}}"
+const {{.StructName.UpperS}}TableName = "{{.TableName}}"
 
 // {{.StructName.UpperS}} table model
 type {{.StructName.UpperS}} struct { {{range $item := .Columns}}
