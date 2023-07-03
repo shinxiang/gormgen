@@ -48,6 +48,20 @@ func (m *{{.StructName.UpperS}}Dao) Error(db *gorm.DB) error {
 	}
 	return nil
 }
+
+// TableName Get table name from context, key is TABLE_NAME.
+func (m *{{.StructName.UpperS}}Dao) TableName(ctx context.Context) string {
+	if ctx != nil {
+		val := ctx.Value("TABLE_NAME")
+		switch val.(type) {
+		case string:
+			if tableName := val.(string); tableName != "" {
+				return tableName
+			}
+		}
+	}
+	return model.{{.StructName.UpperS}}TableName
+}
 `
 
 	TmplInsert = `
@@ -80,7 +94,7 @@ func (m *{{.StructName.UpperS}}Dao) Insert(ctx context.Context, {{.StructName.Lo
 		}
 	}
 	{{end}}
-{{ end }}	db := m.db.WithContext(ctx).Create({{.StructName.LowerP}})
+{{ end }}	db := m.db.WithContext(ctx).Table(m.TableName(ctx)).Create({{.StructName.LowerP}})
 	err = m.Error(db)
 	return
 }
@@ -101,7 +115,7 @@ func (m *{{.StructName.UpperS}}Dao) Save(ctx context.Context, {{.StructName.Lowe
 		{{.StructName.LowerS}}.{{.FieldUpdateTime}} = time.Now()
 	}
 {{end}}
-	db := m.db.WithContext(ctx).Save({{.StructName.LowerS}})
+	db := m.db.WithContext(ctx).Table(m.TableName(ctx)).Save({{.StructName.LowerS}})
 	err = m.Error(db)
 	return
 }
@@ -115,7 +129,7 @@ func (m *{{.StructName.UpperS}}Dao) FindOne(ctx context.Context, condition *opt.
 	}
 {{if ne .FieldSoftDeleteKey "" }}	db = db.Where("{{.TableSoftDeleteKey}} != ?", {{.TableSoftDeleteValue}})
 {{ end }}
-	db = db.First(&{{.StructName.LowerS}})
+	db = db.Table(m.TableName(ctx)).First(&{{.StructName.LowerS}})
 	err = m.Error(db)
 	return
 }
@@ -123,13 +137,11 @@ func (m *{{.StructName.UpperS}}Dao) FindOne(ctx context.Context, condition *opt.
 
 	TmplFindList = `
 func (m *{{.StructName.UpperS}}Dao) FindList(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) ({{.StructName.LowerP}} []model.{{.StructName.UpperS}}, total int64, err error) {
-	db := m.db.WithContext(ctx)
+	db := m.db.WithContext(ctx).Table(m.TableName(ctx))
 	if condition != nil {
 		db = condition.BuildQuery(db)
 	}
-{{if ne .FieldSoftDeleteKey "" }}	db = db.Where("{{.TableSoftDeleteKey}} != ?", {{.TableSoftDeleteValue}})
-{{ end }}
-	db = db.Table(model.{{.StructName.UpperS}}TableName)
+{{if ne .FieldSoftDeleteKey "" }}	db = db.Where("{{.TableSoftDeleteKey}} != ?", {{.TableSoftDeleteValue}})	{{ end }}
 	if err = db.Count(&total).Error; total == 0 {
 		return
 	}
@@ -151,7 +163,7 @@ func (m *{{.StructName.UpperS}}Dao) Count(ctx context.Context, condition *opt.{{
 	}
 {{if ne .FieldSoftDeleteKey "" }}	db = db.Where("{{.TableSoftDeleteKey}} != ?", {{.TableSoftDeleteValue}})
 {{ end }}
-	db = db.Table(model.{{.StructName.UpperS}}TableName).Count(&count)
+	db = db.Table(m.TableName(ctx)).Count(&count)
 	err = m.Error(db)
 	return
 }
@@ -173,7 +185,7 @@ func (m *{{.StructName.UpperS}}Dao) Update(ctx context.Context, {{.StructName.Lo
 	db = condition.BuildQuery(db)
 {{if ne .FieldSoftDeleteKey "" }}	db = db.Where("{{.TableSoftDeleteKey}} != ?", {{.TableSoftDeleteValue}})
 {{ end }}
-	db = db.Table(model.{{.StructName.UpperS}}TableName).Updates({{.StructName.LowerS}})
+	db = db.Table(m.TableName(ctx)).Updates({{.StructName.LowerS}})
 	err = m.Error(db)
 	return
 }
@@ -189,7 +201,7 @@ func (m *{{.StructName.UpperS}}Dao) Delete(ctx context.Context, condition *opt.{
 	db = condition.BuildQuery(db)
 {{if ne .FieldSoftDeleteKey "" }}	db = db.Where("{{.TableSoftDeleteKey}} != ?", {{.TableSoftDeleteValue}})
 {{ end }}
-	db = db.Table(model.{{.StructName.UpperS}}TableName).
+	db = db.Table(m.TableName(ctx)).
 {{if eq .FieldSoftDeleteKey "" }} Delete(&model.{{.StructName.UpperS}}{})
 {{ else }}  {{if eq .FieldUpdateTime "" }}
 				Select("{{.TableSoftDeleteKey}}").

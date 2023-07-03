@@ -39,6 +39,20 @@ func (m *OrderDao) Error(db *gorm.DB) error {
 	return nil
 }
 
+// TableName Get table name from context, key is TABLE_NAME.
+func (m *OrderDao) TableName(ctx context.Context) string {
+	if ctx != nil {
+		val := ctx.Value("TABLE_NAME")
+		switch val.(type) {
+		case string:
+			if tableName := val.(string); tableName != "" {
+				return tableName
+			}
+		}
+	}
+	return model.OrderTableName
+}
+
 func (m *OrderDao) Insert(ctx context.Context, orders ...*model.Order) (err error) {
 	if orders == nil {
 		return errors.New("insert must include orders model")
@@ -52,7 +66,7 @@ func (m *OrderDao) Insert(ctx context.Context, orders ...*model.Order) (err erro
 			orders[i].UpdateTime = time.Now()
 		}
 	}
-	db := m.db.WithContext(ctx).Create(orders)
+	db := m.db.WithContext(ctx).Table(m.TableName(ctx)).Create(orders)
 	err = m.Error(db)
 	return
 }
@@ -70,7 +84,7 @@ func (m *OrderDao) Save(ctx context.Context, order *model.Order) (err error) {
 		order.UpdateTime = time.Now()
 	}
 
-	db := m.db.WithContext(ctx).Save(order)
+	db := m.db.WithContext(ctx).Table(m.TableName(ctx)).Save(order)
 	err = m.Error(db)
 	return
 }
@@ -82,19 +96,17 @@ func (m *OrderDao) FindOne(ctx context.Context, condition *opt.OrderOption) (ord
 	}
 	db = db.Where("deleted != ?", 1)
 
-	db = db.First(&order)
+	db = db.Table(m.TableName(ctx)).First(&order)
 	err = m.Error(db)
 	return
 }
 
 func (m *OrderDao) FindList(ctx context.Context, condition *opt.OrderOption) (orders []model.Order, total int64, err error) {
-	db := m.db.WithContext(ctx)
+	db := m.db.WithContext(ctx).Table(m.TableName(ctx))
 	if condition != nil {
 		db = condition.BuildQuery(db)
 	}
 	db = db.Where("deleted != ?", 1)
-
-	db = db.Table(model.OrderTableName)
 	if err = db.Count(&total).Error; total == 0 {
 		return
 	}
@@ -114,7 +126,7 @@ func (m *OrderDao) Count(ctx context.Context, condition *opt.OrderOption) (count
 	}
 	db = db.Where("deleted != ?", 1)
 
-	db = db.Table(model.OrderTableName).Count(&count)
+	db = db.Table(m.TableName(ctx)).Count(&count)
 	err = m.Error(db)
 	return
 }
@@ -134,7 +146,7 @@ func (m *OrderDao) Update(ctx context.Context, order *model.Order, condition *op
 	db = condition.BuildQuery(db)
 	db = db.Where("deleted != ?", 1)
 
-	db = db.Table(model.OrderTableName).Updates(order)
+	db = db.Table(m.TableName(ctx)).Updates(order)
 	err = m.Error(db)
 	return
 }
@@ -148,7 +160,7 @@ func (m *OrderDao) Delete(ctx context.Context, condition *opt.OrderOption) (err 
 	db = condition.BuildQuery(db)
 	db = db.Where("deleted != ?", 1)
 
-	db = db.Table(model.OrderTableName).
+	db = db.Table(m.TableName(ctx)).
 		Select("deleted", "update_time").
 		Updates(&model.Order{
 			Deleted:    1,

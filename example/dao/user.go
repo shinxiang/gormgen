@@ -39,6 +39,20 @@ func (m *UserDao) Error(db *gorm.DB) error {
 	return nil
 }
 
+// TableName Get table name from context, key is TABLE_NAME.
+func (m *UserDao) TableName(ctx context.Context) string {
+	if ctx != nil {
+		val := ctx.Value("TABLE_NAME")
+		switch val.(type) {
+		case string:
+			if tableName := val.(string); tableName != "" {
+				return tableName
+			}
+		}
+	}
+	return model.UserTableName
+}
+
 func (m *UserDao) Insert(ctx context.Context, users ...*model.User) (err error) {
 	if users == nil {
 		return errors.New("insert must include users model")
@@ -52,7 +66,7 @@ func (m *UserDao) Insert(ctx context.Context, users ...*model.User) (err error) 
 			users[i].UpdateTime = time.Now()
 		}
 	}
-	db := m.db.WithContext(ctx).Create(users)
+	db := m.db.WithContext(ctx).Table(m.TableName(ctx)).Create(users)
 	err = m.Error(db)
 	return
 }
@@ -70,7 +84,7 @@ func (m *UserDao) Save(ctx context.Context, user *model.User) (err error) {
 		user.UpdateTime = time.Now()
 	}
 
-	db := m.db.WithContext(ctx).Save(user)
+	db := m.db.WithContext(ctx).Table(m.TableName(ctx)).Save(user)
 	err = m.Error(db)
 	return
 }
@@ -82,19 +96,17 @@ func (m *UserDao) FindOne(ctx context.Context, condition *opt.UserOption) (user 
 	}
 	db = db.Where("deleted != ?", 1)
 
-	db = db.First(&user)
+	db = db.Table(m.TableName(ctx)).First(&user)
 	err = m.Error(db)
 	return
 }
 
 func (m *UserDao) FindList(ctx context.Context, condition *opt.UserOption) (users []model.User, total int64, err error) {
-	db := m.db.WithContext(ctx)
+	db := m.db.WithContext(ctx).Table(m.TableName(ctx))
 	if condition != nil {
 		db = condition.BuildQuery(db)
 	}
 	db = db.Where("deleted != ?", 1)
-
-	db = db.Table(model.UserTableName)
 	if err = db.Count(&total).Error; total == 0 {
 		return
 	}
@@ -114,7 +126,7 @@ func (m *UserDao) Count(ctx context.Context, condition *opt.UserOption) (count i
 	}
 	db = db.Where("deleted != ?", 1)
 
-	db = db.Table(model.UserTableName).Count(&count)
+	db = db.Table(m.TableName(ctx)).Count(&count)
 	err = m.Error(db)
 	return
 }
@@ -134,7 +146,7 @@ func (m *UserDao) Update(ctx context.Context, user *model.User, condition *opt.U
 	db = condition.BuildQuery(db)
 	db = db.Where("deleted != ?", 1)
 
-	db = db.Table(model.UserTableName).Updates(user)
+	db = db.Table(m.TableName(ctx)).Updates(user)
 	err = m.Error(db)
 	return
 }
@@ -148,7 +160,7 @@ func (m *UserDao) Delete(ctx context.Context, condition *opt.UserOption) (err er
 	db = condition.BuildQuery(db)
 	db = db.Where("deleted != ?", 1)
 
-	db = db.Table(model.UserTableName).
+	db = db.Table(m.TableName(ctx)).
 		Select("deleted", "update_time").
 		Updates(&model.User{
 			Deleted:    1,
