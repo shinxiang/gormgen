@@ -16,7 +16,7 @@ type IUserDao interface {
 	Insert(ctx context.Context, users ...*model.User) (err error)
 	Save(ctx context.Context, user *model.User) (err error)
 	FindOne(ctx context.Context, condition *opt.UserOption) (user *model.User, err error)
-	FindList(ctx context.Context, condition *opt.UserOption) (users []model.User, total int64, err error)
+	FindList(ctx context.Context, condition *opt.UserOption) (users []*model.User, total int64, err error)
 	Count(ctx context.Context, condition *opt.UserOption) (count int64, err error)
 	Update(ctx context.Context, user *model.User, condition *opt.UserOption) (err error)
 	Delete(ctx context.Context, condition *opt.UserOption) (err error)
@@ -101,7 +101,7 @@ func (m *UserDao) FindOne(ctx context.Context, condition *opt.UserOption) (user 
 	return
 }
 
-func (m *UserDao) FindList(ctx context.Context, condition *opt.UserOption) (users []model.User, total int64, err error) {
+func (m *UserDao) FindList(ctx context.Context, condition *opt.UserOption) (users []*model.User, total int64, err error) {
 	db := m.db.WithContext(ctx).Table(m.TableName(ctx))
 	if condition != nil {
 		db = condition.BuildQuery(db)

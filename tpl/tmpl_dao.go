@@ -23,7 +23,7 @@ type I{{.StructName.UpperS}}Dao interface {
 	Insert(ctx context.Context, {{.StructName.LowerP}} ...*model.{{.StructName.UpperS}}) (err error)
 	Save(ctx context.Context, {{.StructName.LowerS}} *model.{{.StructName.UpperS}}) (err error)
 	FindOne(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) ({{.StructName.LowerS}} *model.{{.StructName.UpperS}}, err error)
-	FindList(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) ({{.StructName.LowerS}}s []model.{{.StructName.UpperS}}, total int64, err error)
+	FindList(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) ({{.StructName.LowerS}}s []*model.{{.StructName.UpperS}}, total int64, err error)
 	Count(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) (count int64, err error)
 	Update(ctx context.Context, {{.StructName.LowerS}} *model.{{.StructName.UpperS}}, condition *opt.{{.StructName.UpperS}}Option) (err error)
 	Delete(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) (err error)
@@ -136,7 +136,7 @@ func (m *{{.StructName.UpperS}}Dao) FindOne(ctx context.Context, condition *opt.
 `
 
 	TmplFindList = `
-func (m *{{.StructName.UpperS}}Dao) FindList(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) ({{.StructName.LowerP}} []model.{{.StructName.UpperS}}, total int64, err error) {
+func (m *{{.StructName.UpperS}}Dao) FindList(ctx context.Context, condition *opt.{{.StructName.UpperS}}Option) ({{.StructName.LowerP}} []*model.{{.StructName.UpperS}}, total int64, err error) {
 	db := m.db.WithContext(ctx).Table(m.TableName(ctx))
 	if condition != nil {
 		db = condition.BuildQuery(db)

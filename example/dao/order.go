@@ -16,7 +16,7 @@ type IOrderDao interface {
 	Insert(ctx context.Context, orders ...*model.Order) (err error)
 	Save(ctx context.Context, order *model.Order) (err error)
 	FindOne(ctx context.Context, condition *opt.OrderOption) (order *model.Order, err error)
-	FindList(ctx context.Context, condition *opt.OrderOption) (orders []model.Order, total int64, err error)
+	FindList(ctx context.Context, condition *opt.OrderOption) (orders []*model.Order, total int64, err error)
 	Count(ctx context.Context, condition *opt.OrderOption) (count int64, err error)
 	Update(ctx context.Context, order *model.Order, condition *opt.OrderOption) (err error)
 	Delete(ctx context.Context, condition *opt.OrderOption) (err error)
@@ -101,7 +101,7 @@ func (m *OrderDao) FindOne(ctx context.Context, condition *opt.OrderOption) (ord
 	return
 }
 
-func (m *OrderDao) FindList(ctx context.Context, condition *opt.OrderOption) (orders []model.Order, total int64, err error) {
+func (m *OrderDao) FindList(ctx context.Context, condition *opt.OrderOption) (orders []*model.Order, total int64, err error) {
 	db := m.db.WithContext(ctx).Table(m.TableName(ctx))
 	if condition != nil {
 		db = condition.BuildQuery(db)
