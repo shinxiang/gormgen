@@ -4,13 +4,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/shinxiang/gormgen/example/opt"
 	"log"
 	"os"
 	"time"
 
 	"github.com/shinxiang/gormgen/example/dao"
 	"github.com/shinxiang/gormgen/example/model"
+	"github.com/shinxiang/gormgen/example/opt"
 
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
