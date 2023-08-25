@@ -19,7 +19,7 @@ type {{.StructName.UpperS}} struct { {{range $item := .Columns}}
 	{{$item.FieldName}}	{{$item.FieldType}}	` + "`" + `gorm:"column:{{$item.GormName}}{{$item.PrimaryKey}}" json:"{{$item.JsonName}}"` + "`" + ` // {{$item.Comment}} {{end}}
 }
 
-func ({{.StructName.LowerS}} *{{.StructName.UpperS}}) TableName() string {
+func (m *{{.StructName.UpperS}}) TableName() string {
 	return {{.StructName.UpperS}}TableName
 }
 

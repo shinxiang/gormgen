@@ -34,6 +34,7 @@ var tableToGoStruct = map[string]string{
 	"varchar":   "string",
 	"char":      "string",
 	"text":      "string",
+	"json":      "string",
 }
 
 func GetAllTables(db *sql.DB) ([]string, error) {
@@ -121,8 +122,14 @@ func parseTable(s string) []FieldLevel {
 			dataType := p[1]
 			isUnsigned := strings.Contains(line, unsignedKeyFlag)
 			comment := ""
-			if strings.ToUpper(p[len(p)-2]) == commentMark {
-				comment = strings.Trim(strings.Trim(p[len(p)-1], ","), "'")
+			if strings.Contains(line, commentMark) {
+				if index := strings.LastIndex(line, commentMark); index > 0 {
+					comment = line[index+len(commentMark):]
+					if idx := strings.LastIndex(comment, "'"); idx > 0 {
+						comment = comment[:idx]
+						comment = strings.Trim(strings.Trim(comment, " "), "'")
+					}
+				}
 			}
 
 			primaryKey := ""

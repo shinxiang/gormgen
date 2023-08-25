@@ -17,6 +17,6 @@ type Order struct {
 	Deleted    int       `gorm:"column:deleted" json:"deleted"`        // 删除状态，1表示软删除
 }
 
-func (order *Order) TableName() string {
+func (m *Order) TableName() string {
 	return OrderTableName
 }

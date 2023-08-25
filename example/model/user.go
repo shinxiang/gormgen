@@ -21,6 +21,6 @@ type User struct {
 	Deleted    int       `gorm:"column:deleted" json:"deleted"`        // 逻辑删除：0-正常，1-删除
 }
 
-func (user *User) TableName() string {
+func (m *User) TableName() string {
 	return UserTableName
 }
