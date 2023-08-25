@@ -34,7 +34,7 @@ var tableToGoStruct = map[string]string{
 	"varchar":   "string",
 	"char":      "string",
 	"text":      "string",
-	"json":      "string",
+	"json":      "datatypes.JSON",
 }
 
 func GetAllTables(db *sql.DB) ([]string, error) {
