@@ -34,6 +34,7 @@ var tableToGoStruct = map[string]string{
 	"varchar":   "string",
 	"char":      "string",
 	"text":      "string",
+	"blob":      "[]byte",
 	"json":      "datatypes.JSON",
 }
 
@@ -95,9 +96,11 @@ func Generate(db *sql.DB, table string, matchInfo TableInfo) (StructLevel, error
 		case matchInfo.CreateTime:
 			structData.TableCreateTime = matchInfo.CreateTime
 			structData.FieldCreateTime = v.FieldName
+			structData.IsTimestamp = matchInfo.IsTimestamp
 		case matchInfo.UpdateTime:
 			structData.TableUpdateTime = matchInfo.UpdateTime
 			structData.FieldUpdateTime = v.FieldName
+			structData.IsTimestamp = matchInfo.IsTimestamp
 		case matchInfo.SoftDeleteKey:
 			structData.TableSoftDeleteKey = matchInfo.SoftDeleteKey
 			structData.TableSoftDeleteValue = matchInfo.SoftDeleteValue
@@ -121,17 +124,6 @@ func parseTable(s string) []FieldLevel {
 			name := strings.Trim(p[0], "`")
 			dataType := p[1]
 			isUnsigned := strings.Contains(line, unsignedKeyFlag)
-			comment := ""
-			if strings.Contains(line, commentMark) {
-				if index := strings.LastIndex(line, commentMark); index > 0 {
-					comment = line[index+len(commentMark):]
-					if idx := strings.LastIndex(comment, "'"); idx > 0 {
-						comment = comment[:idx]
-						comment = strings.Trim(strings.Trim(comment, " "), "'")
-					}
-				}
-			}
-
 			primaryKey := ""
 			if isPrimaryKey[name] {
 				primaryKey = ";primary_key"
@@ -142,7 +134,7 @@ func parseTable(s string) []FieldLevel {
 				PrimaryKey: primaryKey,
 				GormName:   name,
 				JsonName:   jsonCamelCase(name),
-				Comment:    comment,
+				Comment:    fieldComment(p),
 			})
 		}
 	}
@@ -182,6 +174,19 @@ func fieldType(dataType string, isUnsigned bool) string {
 		}
 	}
 	return "unknown"
+}
+
+func fieldComment(p []string) (comment string) {
+	for i := len(p); i > 2; i-- {
+		if strings.ToUpper(p[i-2]) == commentMark {
+			comment = strings.Join(p[i-1:], " ")
+			comment = strings.Trim(strings.Trim(comment, ","), "'")
+			if comment != "" {
+				break
+			}
+		}
+	}
+	return
 }
 
 func camelCase(s string) string {

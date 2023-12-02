@@ -17,6 +17,9 @@ type StructLevel struct {
 	TableUpdateTime string
 	FieldUpdateTime string
 
+	// is timestamp
+	IsTimestamp bool
+
 	// soft delete
 	TableSoftDeleteKey   string
 	TableSoftDeleteValue int

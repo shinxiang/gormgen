@@ -71,27 +71,45 @@ func (m *{{.StructName.UpperS}}Dao) Insert(ctx context.Context, {{.StructName.Lo
 	}
 {{ if and (ne .FieldCreateTime "") (ne .FieldUpdateTime "") }}
 	for i := range {{.StructName.LowerP}} {
-        if {{.StructName.LowerP}}[i].{{.FieldCreateTime}}.IsZero() {
+	{{ if  .IsTimestamp }}  if {{.StructName.LowerP}}[i].{{.FieldCreateTime}} == 0 {
+			{{.StructName.LowerP}}[i].{{.FieldCreateTime}} = time.Now().UTC().UnixMilli()
+		}
+		if {{.StructName.LowerP}}[i].{{.FieldUpdateTime}} == 0 {
+			{{.StructName.LowerP}}[i].{{.FieldUpdateTime}} = time.Now().UTC().UnixMilli()
+		}
+	{{ else }}  if {{.StructName.LowerP}}[i].{{.FieldCreateTime}}.IsZero() {
 			{{.StructName.LowerP}}[i].{{.FieldCreateTime}} = time.Now()
 		}
 		if {{.StructName.LowerP}}[i].{{.FieldUpdateTime}}.IsZero() {
 			{{.StructName.LowerP}}[i].{{.FieldUpdateTime}} = time.Now()
 		}
-	}
+	{{ end }}  }
 {{ else }}
 	{{if ne .FieldCreateTime "" }}
 	for i := range {{.StructName.LowerP}} {
+	{{ if  .IsTimestamp }}
+		if {{.StructName.LowerP}}[i].{{.FieldCreateTime}} == 0 {
+			{{.StructName.LowerP}}[i].{{.FieldCreateTime}} = time.Now().UTC().UnixMilli()
+		}
+	{{ else }}
         if {{.StructName.LowerP}}[i].{{.FieldCreateTime}}.IsZero() {
 			{{.StructName.LowerP}}[i].{{.FieldCreateTime}} = time.Now()
 		}
+	{{ end }}
 	}
 	{{end}}
 	
 	{{if ne .FieldUpdateTime "" }}
 	for i := range {{.StructName.LowerP}} {
+	{{ if  .IsTimestamp }}
+		if {{.StructName.LowerP}}[i].{{.FieldUpdateTime}} == 0 {
+			{{.StructName.LowerP}}[i].{{.FieldUpdateTime}} = time.Now().UTC().UnixMilli()
+		}
+	{{ else }}
         if {{.StructName.LowerP}}[i].{{.FieldUpdateTime}}.IsZero() {
 			{{.StructName.LowerP}}[i].{{.FieldUpdateTime}} = time.Now()
 		}
+	{{ end }}
 	}
 	{{end}}
 {{ end }}	db := m.db.WithContext(ctx).Table(m.TableName(ctx)).Create({{.StructName.LowerP}})
@@ -106,14 +124,26 @@ func (m *{{.StructName.UpperS}}Dao) Save(ctx context.Context, {{.StructName.Lowe
 		return errors.New("save must include {{.StructName.LowerS}} model")
 	}
 {{if ne .FieldCreateTime "" }}
+	{{ if  .IsTimestamp }}
+	if {{.StructName.LowerS}}.{{.FieldCreateTime}} == 0 {
+		{{.StructName.LowerS}}.{{.FieldCreateTime}} = time.Now().UTC().UnixMilli()
+	}
+	{{ else }}
 	if {{.StructName.LowerS}}.{{.FieldCreateTime}}.IsZero() {
 		{{.StructName.LowerS}}.{{.FieldCreateTime}} = time.Now()
 	}
+	{{ end }}
 {{end}}
 {{if ne .FieldUpdateTime "" }}
+	{{ if  .IsTimestamp }}
+	if {{.StructName.LowerS}}.{{.FieldUpdateTime}} == 0 {
+		{{.StructName.LowerS}}.{{.FieldUpdateTime}} = time.Now().UTC().UnixMilli()
+	}
+	{{ else }}
     if {{.StructName.LowerS}}.{{.FieldUpdateTime}}.IsZero() {
 		{{.StructName.LowerS}}.{{.FieldUpdateTime}} = time.Now()
 	}
+	{{ end }}
 {{end}}
 	db := m.db.WithContext(ctx).Table(m.TableName(ctx)).Save({{.StructName.LowerS}})
 	err = m.Error(db)
@@ -177,9 +207,15 @@ func (m *{{.StructName.UpperS}}Dao) Update(ctx context.Context, {{.StructName.Lo
 		return errors.New("update must include where condition")
 	}
 {{if ne .FieldUpdateTime "" }}
+	{{ if  .IsTimestamp }}
+	if {{.StructName.LowerS}}.{{.FieldUpdateTime}} == 0 {
+		{{.StructName.LowerS}}.{{.FieldUpdateTime}} = time.Now().UTC().UnixMilli()
+	}
+	{{ else }}
     if {{.StructName.LowerS}}.{{.FieldUpdateTime}}.IsZero() {
 		{{.StructName.LowerS}}.{{.FieldUpdateTime}} = time.Now()
 	}
+	{{ end }}
 {{end}}
 	db := m.db.WithContext(ctx)
 	db = condition.BuildQuery(db)
@@ -212,7 +248,9 @@ func (m *{{.StructName.UpperS}}Dao) Delete(ctx context.Context, condition *opt.{
                 Select("{{.TableSoftDeleteKey}}","{{.TableUpdateTime}}").
 				Updates(&model.{{.StructName.UpperS}}{
 					{{.FieldSoftDeleteKey}}:{{.TableSoftDeleteValue}},
-					{{.FieldUpdateTime}} : time.Now(),
+				{{ if  .IsTimestamp }}  {{.FieldUpdateTime}} : time.Now().UTC().UnixMilli(),
+				{{ else }}  {{.FieldUpdateTime}} : time.Now(),
+				{{ end }}
 				})
             {{ end }}
 {{ end }}	err = m.Error(db)

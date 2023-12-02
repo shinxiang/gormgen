@@ -1,5 +1,5 @@
 ## Gormgen
-Fork from [micro_web_service/pkg](https://github.com/Junedayday/micro_web_service/tree/master/pkg/gormer) and has been revised.
+gormgen is a code generation tool to generate CRUD API for query and update [gorm](https://github.com/go-gorm/gorm) structs.
 
 ## How to use it
 ```

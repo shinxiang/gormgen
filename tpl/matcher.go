@@ -7,6 +7,7 @@ type TableInfo struct {
 	GoStruct        string `yaml:"goStruct"`
 	CreateTime      string `yaml:"createTime"`
 	UpdateTime      string `yaml:"updateTime"`
+	IsTimestamp     bool   `yaml:"isTimestamp"`
 	SoftDeleteKey   string `yaml:"softDeleteKey"`
 	SoftDeleteValue int    `yaml:"softDeleteValue"`
 }

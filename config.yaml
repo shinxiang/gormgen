@@ -14,19 +14,22 @@ database:
   tables:
     # name-表名（必填）
     # goStruct-Go中结构体名（必填）
-    # createTime-创建时间的数据库字段，必须为时间格式
-    # updateTime-更新时间的数据库字段，必须为时间格式
+    # createTime-创建时间的数据库字段，必须为时间格式（或时间戳）
+    # updateTime-更新时间的数据库字段，必须为时间格式（或时间戳）
+    # isTimestamp-时间字段格式，是否使用UTC时间戳（毫秒）
     # softDeleteKey-软删除的数据库字段，必须为整数型，不填则为硬删除
     # softDeleteValue-表示为软删除的对应值
     - name: "user"
       goStruct: "user"
       createTime: "create_time"
       updateTime: "update_time"
+      isTimestamp: false
       softDeleteKey: "deleted"
       softDeleteValue: 1
     - name: "orders"
       goStruct: "order"
       createTime: "create_time"
       updateTime: "update_time"
+      isTimestamp: false
       softDeleteKey: "deleted"
       softDeleteValue: 1
