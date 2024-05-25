@@ -7,6 +7,7 @@ import (
 	"context"
 	"time"
 	"errors"
+ 	"strings"
 	
 	"gorm.io/gorm"
 	"%s/%s"
@@ -205,6 +206,12 @@ func (m *{{.StructName.UpperS}}Dao) Update(ctx context.Context, {{.StructName.Lo
 		return errors.New("update must include {{.StructName.LowerS}} model")
 	} else if condition == nil {
 		return errors.New("update must include where condition")
+	} else if s := condition.GetSelect(); s != nil {
+		for _, v := range s {
+			if strings.Contains(v, ",") {
+				return errors.New("update fields must not contain ','")
+			}
+		}
 	}
 {{if ne .FieldUpdateTime "" }}
 	{{ if  .IsTimestamp }}
